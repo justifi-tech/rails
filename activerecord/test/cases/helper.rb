@@ -38,7 +38,7 @@ end
 
 def in_memory_db?
   current_adapter?(:SQLite3Adapter) &&
-  ActiveRecord::Base.connection_pool.db_config.database == ":memory:"
+    ActiveRecord::Base.connection_pool.db_config.database == ":memory:"
 end
 
 def mysql_enforcing_gtid_consistency?
@@ -210,15 +210,25 @@ end
 
 module InTimeZone
   private
-    def in_time_zone(zone)
-      old_zone  = Time.zone
-      old_tz    = ActiveRecord::Base.time_zone_aware_attributes
+  def in_time_zone(zone)
+    old_zone  = Time.zone
+    old_tz    = ActiveRecord::Base.time_zone_aware_attributes
 
-      Time.zone = zone ? ActiveSupport::TimeZone[zone] : nil
-      ActiveRecord::Base.time_zone_aware_attributes = !zone.nil?
-      yield
-    ensure
-      Time.zone = old_zone
-      ActiveRecord::Base.time_zone_aware_attributes = old_tz
-    end
+    Time.zone = zone ? ActiveSupport::TimeZone[zone] : nil
+    ActiveRecord::Base.time_zone_aware_attributes = !zone.nil?
+    yield
+  ensure
+    Time.zone = old_zone
+    ActiveRecord::Base.time_zone_aware_attributes = old_tz
+  end
 end
+
+# Encryption
+
+ActiveRecord::Encryption.configure \
+  primary_key: "test primary key",
+  deterministic_key: "test deterministic key",
+  key_derivation_salt: "testing key derivation salt"
+
+ActiveRecord::Encryption::ExtendedDeterministicQueries.install_support
+ActiveRecord::Encryption::ExtendedDeterministicUniquenessValidator.install_support

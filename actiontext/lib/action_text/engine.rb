@@ -25,6 +25,7 @@ module ActionText
     initializer "action_text.attachable" do
       ActiveSupport.on_load(:active_storage_blob) do
         include ActionText::Attachable
+        prepend ActionText::Encryption
 
         def previewable_attachable?
           representable?

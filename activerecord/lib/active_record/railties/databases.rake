@@ -405,17 +405,17 @@ db_namespace = namespace :db do
       base_dir = ActiveRecord::Tasks::DatabaseTasks.fixtures_path
 
       fixtures_dir = if ENV["FIXTURES_DIR"]
-        File.join base_dir, ENV["FIXTURES_DIR"]
-      else
-        base_dir
-      end
+                       File.join base_dir, ENV["FIXTURES_DIR"]
+                     else
+                       base_dir
+                     end
 
       fixture_files = if ENV["FIXTURES"]
-        ENV["FIXTURES"].split(",")
-      else
-        # The use of String#[] here is to support namespaced fixtures.
-        Dir["#{fixtures_dir}/**/*.yml"].map { |f| f[(fixtures_dir.size + 1)..-5] }
-      end
+                        ENV["FIXTURES"].split(",")
+                      else
+                        # The use of String#[] here is to support namespaced fixtures.
+                        Dir["#{fixtures_dir}/**/*.yml"].map { |f| f[(fixtures_dir.size + 1)..-5] }
+                      end
 
       ActiveRecord::FixtureSet.create_fixtures(fixtures_dir, fixture_files)
     end
@@ -579,6 +579,21 @@ db_namespace = namespace :db do
     end
   end
 
+  namespace :encryption do
+    desc "Generate a set of keys for configuring Active Record encryption in a given environment"
+    task :init do
+      puts <<~MSG
+         Add this entry to the credentials of the target environment:#{' '}
+
+         active_record_encryption:
+           primary_key: #{SecureRandom.alphanumeric(32)}
+           deterministic_key: #{SecureRandom.alphanumeric(32)}
+           key_derivation_salt: #{SecureRandom.alphanumeric(32)}
+      MSG
+    end
+  end
+
+
   namespace :test do
     # desc "Recreate the test database from the current schema"
     task load: %w(db:test:purge) do
@@ -701,7 +716,7 @@ namespace :railties do
       end
 
       ActiveRecord::Migration.copy(ActiveRecord::Tasks::DatabaseTasks.migrations_paths.first, railties,
-                                    on_skip: on_skip, on_copy: on_copy)
+                                   on_skip: on_skip, on_copy: on_copy)
     end
   end
 end
